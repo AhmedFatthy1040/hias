@@ -1,13 +1,11 @@
 import express from 'express';
+import imageRoutes from "./routes/imageRoutes";
 
 const app = express();
 
-// Middleware to parse JSON
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Example Route
-app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the API!' });
-});
+app.use("/api/images", imageRoutes);
 
 export default app;

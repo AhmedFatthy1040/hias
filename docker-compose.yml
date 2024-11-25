@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres
+    container_name: hias-db
+    environment:
+      POSTGRES_USER: hias-user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: hias
+    ports:
+      - "5432:5432"
