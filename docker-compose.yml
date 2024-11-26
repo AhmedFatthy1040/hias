@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   postgres:
     image: postgres
@@ -10,3 +8,20 @@ services:
       POSTGRES_DB: hias
     ports:
       - "5432:5432"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: hias-api
+    environment:
+      POSTGRES_USER: hias-user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: hias
+      POSTGRES_HOST: postgres
+      NODE_ENV: production
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    command: ["npm", "run", "start"]

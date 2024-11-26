@@ -1,65 +1,65 @@
 -- CreateTable
-CREATE TABLE "annotation" (
+CREATE TABLE "Annotations" (
     "id" SERIAL NOT NULL,
-    "image_id" INTEGER NOT NULL,
+    "imageId" INTEGER NOT NULL,
     "label" TEXT NOT NULL,
-    "x_min" DOUBLE PRECISION NOT NULL,
-    "y_min" DOUBLE PRECISION NOT NULL,
-    "x_max" DOUBLE PRECISION NOT NULL,
-    "y_max" DOUBLE PRECISION NOT NULL,
-    "is_ai_generated" BOOLEAN NOT NULL DEFAULT false,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "xMin" DOUBLE PRECISION NOT NULL,
+    "yMin" DOUBLE PRECISION NOT NULL,
+    "xMax" DOUBLE PRECISION NOT NULL,
+    "yMax" DOUBLE PRECISION NOT NULL,
+    "isAiGenerated" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "annotation_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Annotations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "image" (
+CREATE TABLE "Images" (
     "id" SERIAL NOT NULL,
     "filename" TEXT NOT NULL,
     "path" TEXT NOT NULL,
-    "category_id" INTEGER NOT NULL,
-    "user_id" INTEGER NOT NULL,
-    "uploaded_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "categoryId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "uploadedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "image_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Images_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "category" (
+CREATE TABLE "Categories" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "user_id" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
 
-    CONSTRAINT "category_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Categories_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "user" (
+CREATE TABLE "Users" (
     "id" SERIAL NOT NULL,
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password_hash" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
     "role" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "user_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
+CREATE UNIQUE INDEX "Users_username_key" ON "Users"("username");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
+CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 
 -- AddForeignKey
-ALTER TABLE "annotation" ADD CONSTRAINT "annotation_image_id_fkey" FOREIGN KEY ("image_id") REFERENCES "image"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Annotations" ADD CONSTRAINT "Annotations_imageId_fkey" FOREIGN KEY ("imageId") REFERENCES "Images"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "image" ADD CONSTRAINT "image_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Images" ADD CONSTRAINT "Images_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "image" ADD CONSTRAINT "image_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Images" ADD CONSTRAINT "Images_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "category" ADD CONSTRAINT "category_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Categories" ADD CONSTRAINT "Categories_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
