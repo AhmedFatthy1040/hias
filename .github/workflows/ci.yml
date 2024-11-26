@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  lint-and-test-backend:
-    name: Lint and Test Backend
+  build-backend:
+    name: Build Backend
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout the code
