@@ -13,46 +13,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model annotation {
-  id             Int      @id @default(autoincrement())
-  image_id       Int
-  label          String
-  x_min          Float
-  y_min          Float
-  x_max          Float
-  y_max          Float
-  is_ai_generated Boolean @default(false)
-  created_at     DateTime @default(now())
-  image          image    @relation(fields: [image_id], references: [id])
+model Annotations {
+  id            Int        @id @default(autoincrement())
+  imageId       Int
+  label         String
+  xMin          Float
+  yMin          Float
+  xMax          Float
+  yMax          Float
+  isAiGenerated Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  image         Images      @relation(fields: [imageId], references: [id])
 }
 
-model image {
-  id           Int       @id @default(autoincrement())
+model Images {
+  id           Int           @id @default(autoincrement())
   filename     String
   path         String
-  category_id  Int
-  user_id      Int
-  uploaded_at  DateTime  @default(now())
-  category     category  @relation(fields: [category_id], references: [id])
-  user         user      @relation(fields: [user_id], references: [id])
-  annotations  annotation[]
+  categoryId   Int
+  userId       Int
+  uploadedAt   DateTime       @default(now())
+  category     Categories     @relation(fields: [categoryId], references: [id])
+  user         Users          @relation(fields: [userId], references: [id])
+  annotations  Annotations[]
 }
 
-model category {
-  id      Int       @id @default(autoincrement())
-  name    String
-  user_id Int
-  user    user      @relation(fields: [user_id], references: [id])
-  images  image[]
+model Categories {
+  id         Int        @id @default(autoincrement())
+  name       String
+  userId     Int
+  user       Users      @relation(fields: [userId], references: [id])
+  images     Images[]
 }
 
-model user {
-  id            Int       @id @default(autoincrement())
-  username      String	  @unique
-  email         String    @unique
-  password_hash String
+model Users {
+  id            Int         @id @default(autoincrement())
+  username      String      @unique
+  email         String      @unique
+  passwordHash  String
   role          String
-  created_at    DateTime  @default(now())
-  images        image[]
-  categories    category[]
+  createdAt     DateTime    @default(now())
+  images        Images[]
+  categories    Categories[]
 }
