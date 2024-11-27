@@ -23,7 +23,7 @@ model = torch.hub.load('ultralytics/yolov5', 'yolov5m')
 
 image_predictions = {}
 
-@app.route('/api/images/upload', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def upload_image():
     # Get the image from the request
     file = request.files['image']

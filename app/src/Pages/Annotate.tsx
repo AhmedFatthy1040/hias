@@ -33,7 +33,7 @@ const Annotate = () => {
             const blob = await fetch(selectedImage).then((res) => res.blob());
             formData.append('image', blob);
     
-            const response = await fetch('http://127.0.0.1:5001/api/images/upload', { // Update the URL to match your backend
+            const response = await fetch('http://127.0.0.1:5001/predict', { // Update the URL to match your backend
                 method: 'POST',
                 body: formData,
             });
