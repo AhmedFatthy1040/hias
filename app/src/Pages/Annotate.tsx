@@ -26,32 +26,76 @@ const Annotate = () => {
 
     const handleUpload = async () => {
         if (!selectedImage) return;
-
+    
         setIsUploading(true);
         try {
-            // TODO: Implement actual backend upload
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate upload
-            setUploadedImage(selectedImage);
-            setSelectedImage(null);
+            const formData = new FormData();
+            const blob = await fetch(selectedImage).then((res) => res.blob());
+            formData.append('image', blob);
+    
+            const response = await fetch('http://127.0.0.1:5001/api/images/upload', { // Update the URL to match your backend
+                method: 'POST',
+                body: formData,
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Failed to upload. Status: ${response.status}`);
+            }
+    
+            const uploadData = await response.json();
+            console.log('Fetched image metadata:', uploadData);
+            setUploadedImage(uploadData.image.url); // Save the uploaded image URL
+            alert(uploadData.message); // Display success message
+    
+            // Fetch uploaded image metadata
+            await fetchImageMetadata(); // Call the function to fetch metadata
         } catch (error) {
             console.error('Upload failed:', error);
+            alert(`Error: ${error}`); // Display error message
         } finally {
             setIsUploading(false);
         }
     };
 
+    const fetchImageMetadata = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:5001/api/images'); // Update the URL to match your backend
+            if (!response.ok) {
+                throw new Error(`Failed to fetch metadata. Status: ${response.status}`);
+            }
+            const metadata = await response.json();
+            // Assuming metadata is an array of images
+            console.log('Fetched image metadata:', metadata);
+            // You can store this metadata in state to display it in your component
+        } catch (error) {
+            console.error('Failed to fetch metadata:', error);
+            alert(`Error: ${error}`); // Display error message
+        }
+    };
+
     const handleDetection = async () => {
         if (!uploadedImage) return;
-
+    
         setIsProcessing(true);
         try {
-            // TODO: Implement actual object detection
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing
-            // Sample annotations
-            setAnnotations([
-                { x: 100, y: 100, width: 200, height: 150, label: 'Object 1' },
-                { x: 400, y: 300, width: 150, height: 100, label: 'Object 2' },
-            ]);
+            const formData = new FormData();
+            const imageBlob = await fetch(uploadedImage).then(res => res.blob()); // Fetch the image as a blob
+            formData.append('image', imageBlob, 'image.jpg'); // Append the image blob to FormData
+    
+            const response = await fetch('http://127.0.0.1:5001/api/detect', {
+                method: 'POST',
+                body: formData, // Send the FormData containing the image
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Detection failed. Status: ${response.status}`);
+            }
+    
+            const detectionData = await response.json();
+            console.log('Detection successful:', detectionData);
+            
+            // Assuming detectionData contains annotations
+            setAnnotations(detectionData.predictions); // Set the annotations from the response
         } catch (error) {
             console.error('Detection failed:', error);
         } finally {

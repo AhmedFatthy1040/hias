@@ -24,4 +24,18 @@ export class ImageService {
   }
 
   // Optional: You can create other methods for fetching or managing images.
+
+  static async getAllImages(): Promise<Image[]> { 
+    const query = `SELECT * FROM images ORDER BY created_at DESC`; // Adjust the query as necessary
+    try {
+        const result = await pool.query(query);
+        return result.rows; // Return the array of images
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            throw new Error("Error fetching images from the database: " + error.message);
+        } else {
+            throw new Error("Unknown error occurred");
+        }
+    }
+  }
 }
