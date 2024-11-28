@@ -2,39 +2,66 @@ import React, { useState, useRef } from 'react';
 import Button from '../Components/Button';
 import { Upload, Loader } from 'lucide-react';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const Annotate = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [annotations, setAnnotations] = useState<Array<{ x: number; y: number; width: number; height: number; label: string }>>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
+    const selectedFileRef = useRef<File | null>(null);
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            selectedFileRef.current = file;
             const reader = new FileReader();
             reader.onload = (e) => {
                 setSelectedImage(e.target?.result as string);
                 setUploadedImage(null);
                 setAnnotations([]);
+                setError(null);
             };
             reader.readAsDataURL(file);
         }
     };
 
     const handleUpload = async () => {
-        if (!selectedImage) return;
+        if (!selectedImage || !selectedFileRef.current) return;
 
         setIsUploading(true);
+        setError(null);
+
         try {
-            // TODO: Implement actual backend upload
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate upload
+            const formData = new FormData();
+            formData.append('image', selectedFileRef.current);
+
+            const token = localStorage.getItem('token'); // Get the auth token if you have authentication
+            
+            const response = await fetch(`${API_URL}/images/upload`, {
+                method: 'POST',
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Upload failed');
+            }
+
+            const data = await response.json();
             setUploadedImage(selectedImage);
             setSelectedImage(null);
+            selectedFileRef.current = null;
         } catch (error) {
             console.error('Upload failed:', error);
+            setError(error instanceof Error ? error.message : 'Upload failed');
         } finally {
             setIsUploading(false);
         }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../Components/Input';
 import Button from '../Components/Button';
+import { authService } from '../services/authService';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -10,11 +11,25 @@ const Login = () => {
         password: '',
         rememberMe: false
     });
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement login logic
-        navigate('/annotate');
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            await authService.login({
+                email: formData.email,
+                password: formData.password,
+            });
+            navigate('/annotate');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Login failed');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -22,6 +37,12 @@ const Login = () => {
             <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mt-16 p-8 bg-[#0F172A] rounded-2xl border border-[#1E293B]">
                     <h2 className="text-3xl font-bold text-center mb-8">Welcome back</h2>
+
+                    {error && (
+                        <div className="mb-4 p-4 text-sm text-red-500 bg-red-100 rounded-lg">
+                            {error}
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <Input
@@ -50,32 +71,19 @@ const Login = () => {
                                 />
                                 <span className="ml-2 text-sm text-gray-300">Remember me</span>
                             </label>
-
-                            <Link to="/forgot-password" className="text-sm text-[#E052A0] hover:text-[#4F46E5]">
-                                Forgot password?
-                            </Link>
                         </div>
 
-                        <Button type="submit" fullWidth>
-                            Sign in
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Signing in...' : 'Sign in'}
                         </Button>
 
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-[#1E293B]"></div>
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-[#0F172A] text-gray-400">Or continue with</span>
-                            </div>
-                        </div>
-
-                        <Button type="button" variant="secondary" fullWidth>
-                            Continue with Google
-                        </Button>
-
-                        <p className="text-center text-sm text-gray-400">
+                        <p className="text-sm text-center text-gray-400">
                             Don't have an account?{' '}
-                            <Link to="/signup" className="text-[#E052A0] hover:text-[#4F46E5]">
+                            <Link to="/signup" className="text-[#E052A0] hover:text-[#E052A0]/80">
                                 Sign up
                             </Link>
                         </p>
