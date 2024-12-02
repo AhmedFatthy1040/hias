@@ -1,23 +1,33 @@
 # Use an official Node.js runtime as a parent image
-FROM node:18
+FROM node:20-slim
+
+# Install OpenSSL and build dependencies
+RUN apt-get update -y && \
+    apt-get install -y openssl python3 make g++
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY ./api/package*.json ./
+# Copy package files
+COPY package*.json ./
+COPY ./api/package*.json ./api/
+COPY ./prisma ./prisma/
 
-# Install the dependencies
-RUN npm install
+# Install dependencies with retries (including dev dependencies)
+ENV HUSKY=0
+ENV NPM_CONFIG_LOGLEVEL=verbose
 
-# Copy the rest of your application code
-COPY ./api ./
+RUN npm install --no-optional && \
+    cd ./api && npm install --no-optional
 
-# Build the TypeScript code
-RUN npm run build
+# Generate Prisma Client
+RUN npx prisma generate
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Create a script to handle startup
+COPY ./scripts/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Command to run your app (start after build)
-CMD ["npm", "start"]
+# Use nodemon for development
+RUN npm install -g nodemon ts-node
+
+ENTRYPOINT ["docker-entrypoint.sh"]
