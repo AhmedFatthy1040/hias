@@ -1,27 +1,52 @@
 services:
   postgres:
-    image: postgres
     container_name: hias-db
+    image: postgres:latest
     environment:
       POSTGRES_USER: hias-user
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: hias
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   api:
+    container_name: hias-api
     build:
       context: .
       dockerfile: Dockerfile.api
-    container_name: hias-api
     environment:
-      POSTGRES_USER: hias-user
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: hias
-      POSTGRES_HOST: postgres
-      NODE_ENV: production
+      - DATABASE_URL=postgresql://hias-user:123456@postgres:5432/hias?schema=public
+      - PORT=5000
+      - NODE_ENV=development
     ports:
       - "5000:5000"
+    volumes:
+      - ./api:/app/api
+      - ./prisma:/app/prisma
+      - /app/api/node_modules
     depends_on:
       - postgres
-    command: ["npm", "run", "start"]
+    command: sh -c "cd /app/api && npm run dev"
+
+  app:
+    container_name: hias-app
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app:/app/app
+      - /app/app/node_modules
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - REACT_APP_API_URL=http://localhost:5000
+    command: sh -c "cd /app/app && npm start"
+
+volumes:
+  postgres_data:
