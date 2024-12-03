@@ -14,45 +14,53 @@ datasource db {
 }
 
 model Annotations {
-  id            Int        @id @default(autoincrement())
-  imageId       Int
-  label         String
-  xMin          Float
-  yMin          Float
-  xMax          Float
-  yMax          Float
-  isAiGenerated Boolean     @default(false)
-  createdAt     DateTime    @default(now())
-  image         Images      @relation(fields: [imageId], references: [id])
+  id            Int        @id @default(autoincrement()) @map("id")
+  imageId       Int        @map("image_id")
+  label         String     @map("label")
+  xMin          Float      @map("x_min")
+  yMin          Float      @map("y_min")
+  xMax          Float      @map("x_max")
+  yMax          Float      @map("y_max")
+  isAiGenerated Boolean    @map("is_ai_generated") @default(false)
+  createdAt     DateTime   @map("created_at") @default(now())
+  image         Images     @relation(fields: [imageId], references: [id])
+
+  @@map("annotations")  // Forces the table name to be lowercase
 }
 
 model Images {
-  id           Int           @id @default(autoincrement())
-  filename     String
-  path         String
-  categoryId   Int
-  userId       Int
-  uploadedAt   DateTime       @default(now())
-  category     Categories     @relation(fields: [categoryId], references: [id])
-  user         Users          @relation(fields: [userId], references: [id])
+  id           Int           @id @default(autoincrement()) @map("id")
+  filename     String        @map("filename")
+  path         String        @map("path")
+  categoryId   Int           @map("category_id")
+  userId       Int           @map("user_id")
+  uploadedAt   DateTime      @map("uploaded_at") @default(now())
+  category     Categories    @relation(fields: [categoryId], references: [id])
+  user         Users         @relation(fields: [userId], references: [id])
   annotations  Annotations[]
+
+  @@map("images")  // Forces the table name to be lowercase
 }
 
 model Categories {
-  id         Int        @id @default(autoincrement())
-  name       String
-  userId     Int
+  id         Int        @id @default(autoincrement()) @map("id")
+  name       String     @map("name")
+  userId     Int        @map("user_id")
   user       Users      @relation(fields: [userId], references: [id])
   images     Images[]
+
+  @@map("categories")  // Forces the table name to be lowercase
 }
 
 model Users {
-  id            Int         @id @default(autoincrement())
-  username      String      @unique
-  email         String      @unique
-  passwordHash  String
-  role          String
-  createdAt     DateTime    @default(now())
+  id            Int         @id @default(autoincrement()) @map("id")
+  username      String      @unique @map("username")
+  email         String      @unique @map("email")
+  passwordHash  String      @map("password_hash")
+  role          String      @map("role")
+  createdAt     DateTime    @map("created_at") @default(now())
   images        Images[]
   categories    Categories[]
+
+  @@map("users")  // Forces the table name to be lowercase
 }

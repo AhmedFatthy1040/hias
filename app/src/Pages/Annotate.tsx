@@ -10,7 +10,6 @@ const Annotate = () => {
     const [annotations, setAnnotations] = useState<Array<{ x: number; y: number; width: number; height: number; label: string }>>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
     const selectedFileRef = useRef<File | null>(null);
@@ -24,7 +23,6 @@ const Annotate = () => {
                 setSelectedImage(e.target?.result as string);
                 setUploadedImage(null);
                 setAnnotations([]);
-                setError(null);
             };
             reader.readAsDataURL(file);
         }
@@ -34,7 +32,6 @@ const Annotate = () => {
         if (!selectedImage || !selectedFileRef.current) return;
 
         setIsUploading(true);
-        setError(null);
 
         try {
             const formData = new FormData();
@@ -51,17 +48,15 @@ const Annotate = () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Upload failed');
+                throw new Error('Upload failed');
             }
 
-            const data = await response.json();
+            await response.json(); // Just consume the response
             setUploadedImage(selectedImage);
             setSelectedImage(null);
             selectedFileRef.current = null;
         } catch (error) {
             console.error('Upload failed:', error);
-            setError(error instanceof Error ? error.message : 'Upload failed');
         } finally {
             setIsUploading(false);
         }

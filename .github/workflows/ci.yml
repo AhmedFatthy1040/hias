@@ -8,10 +8,14 @@ on:
     branches:
       - main
 
+env:
+  HUSKY: 0
+
 jobs:
   build-backend:
-    name: Build Backend
+    name: Build & Test Backend
     runs-on: ubuntu-latest
+    
     steps:
       # Step 1: Checkout the code
       - name: Checkout code
@@ -21,14 +25,57 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './api/package-lock.json'
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: npm install
+      # Install root dependencies first
+      - name: Install root dependencies
+        run: npm ci --ignore-scripts
+        env:
+          HUSKY: 0
+
+      # Step 3: Install backend dependencies
+      - name: Install backend dependencies
+        run: npm ci --ignore-scripts
         working-directory: ./api
 
       # Step 4: Build the backend if necessary (you can remove this if not needed)
       - name: Build Backend
         run: npm run build
         working-directory: ./api
+
+  build-frontend:
+    name: Build & Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './app/package-lock.json'
+
+      # Install root dependencies first
+      - name: Install root dependencies
+        run: npm ci --ignore-scripts
+        env:
+          HUSKY: 0
+
+      # Step 3: Install frontend dependencies
+      - name: Install frontend dependencies
+        run: npm ci --ignore-scripts
+        working-directory: ./app
+
+      # Step 5: Build Frontend
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./app
+        env:
+          CI: true
