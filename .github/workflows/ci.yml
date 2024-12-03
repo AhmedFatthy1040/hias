@@ -10,8 +10,9 @@ on:
 
 jobs:
   build-backend:
-    name: Build Backend
+    name: Build & Test Backend
     runs-on: ubuntu-latest
+    
     steps:
       # Step 1: Checkout the code
       - name: Checkout code
@@ -21,14 +22,57 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './api/package-lock.json'
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: npm install
+      # Step 3: Install backend dependencies
+      - name: Install backend dependencies
+        run: npm ci
         working-directory: ./api
 
       # Step 4: Build the backend if necessary (you can remove this if not needed)
       - name: Build Backend
         run: npm run build
         working-directory: ./api
+
+      # Step 5: Run backend tests
+      - name: Run backend tests
+        run: npm test
+        working-directory: ./api
+        env:
+          NODE_ENV: test
+
+  build-frontend:
+    name: Build & Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './app/package-lock.json'
+
+      # Step 3: Install frontend dependencies
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: ./app
+
+      # Step 4: Run frontend tests
+      - name: Run frontend tests
+        run: npm test -- --passWithNoTests
+        working-directory: ./app
+
+      # Step 5: Build Frontend
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./app
+        env:
+          CI: true
